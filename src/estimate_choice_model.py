@@ -12,7 +12,7 @@ def estimate_choice_model():
     df_trips = get_trips_with_decomposed_round_trips()
     generate_data_file(df_trips)
     # Compute average number of trips
-    # compute_average_number_of_trips()
+    compute_average_number_of_trips()
     # Estimation
     data_file_directory = Path('../data/output/data/estimation/')
     data_file_name = 'nb_trips.csv'

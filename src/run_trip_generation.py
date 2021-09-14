@@ -12,7 +12,7 @@ from estimate_choice_model import estimate_choice_model
 
 def run_trip_generation():
     estimate_choice_model()
-    # validate_choice_model()
+    validate_choice_model()
     # estimate_choice_model_home_office()
     # betas = calibrate_the_cuts_from_microcensus()
     # validate_model_with_synthetic_population(betas)
