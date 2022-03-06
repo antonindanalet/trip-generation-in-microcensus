@@ -3,7 +3,7 @@ import biogeme.database as db
 import biogeme.biogeme as bio
 import biogeme.distributions as dist
 import biogeme.messaging as msg
-from biogeme.expressions import Beta, DefineVariable, log, Elem, Variable, bioMin
+from biogeme.expressions import Beta, DefineVariable, log, Elem, bioMin
 import biogeme.models as models
 import os
 
@@ -17,7 +17,7 @@ def run_estimation_home_work(data_file_directory, data_file_name, output_directo
     Eleven ordered alternatives: 0, 1, 2, 3 and 4+ trips from home to work."""
 
     # Read the data
-    df = pd.read_csv(data_file_directory / data_file_name, ';')
+    df = pd.read_csv(data_file_directory / data_file_name, sep=';')
     database = db.Database(data_file_name, df)
     # The Pandas data structure is available as database.data. Use all the
     # Pandas functions to investigate the database
@@ -88,19 +88,16 @@ def run_estimation_home_work(data_file_directory, data_file_name, output_directo
     b_percentage_home_office = Beta('b_percentage_home_office', 0, None, None, 0)
     b_french = Beta('b_french', 0, None, None, 0)
     b_italian_employees = Beta('b_italian_employees', 0, None, None, 1)
-    b_business_sector_agriculture_employee = Beta('b_business_sector_agriculture_employee', 0, None, None, 0)
-    b_business_sector_agriculture_cadre = Beta('b_business_sector_agriculture_cadre', 0, None, None, 0)
+    b_business_sector_agriculture = Beta('b_business_sector_agriculture', 0, None, None, 0)
     b_business_sector_production = Beta('b_business_sector_production', 0, None, None, 0)
-    b_business_sector_wholesale_employee = Beta('b_business_sector_wholesale_employee', 0, None, None, 0)
-    b_business_sector_wholesale_cadre = Beta('b_business_sector_wholesale_cadre', 0, None, None, 0)
-    b_business_sector_retail = Beta('b_business_sector_retail', 0, None, None, 1)
-    b_business_sector_gastronomy = Beta('b_business_sector_gastronomy', 0, None, None, 0)
-    b_business_sector_finance = Beta('b_business_sector_finance', 0, None, None, 1)
-    b_business_sector_services_fc = Beta('b_business_sector_services_fc', 0, None, None, 1)
+    b_business_sector_wholesale = Beta('b_business_sector_wholesale', 0, None, None, 0)
+    b_business_sector_retail = Beta('b_business_sector_retail', 0, None, None, 0)
+    b_business_sector_gastronomy = Beta('b_business_sector_gastronomy', 0, None, None, 1)
+    b_business_sector_finance = Beta('b_business_sector_finance', 0, None, None, 0)
+    b_business_sector_services_fc = Beta('b_business_sector_services_fc', 0, None, None, 0)
     b_business_sector_other_services = Beta('b_business_sector_other_services', 0, None, None, 1)
     b_business_sector_others = Beta('b_business_sector_others', 0, None, None, 1)
-    b_business_sector_non_movers_employee = Beta('b_business_sector_non_movers_employee', 0, None, None, 0)
-    b_business_sector_non_movers_cadre = Beta('b_business_sector_non_movers_cadre', 0, None, None, 0)
+    b_business_sector_non_movers = Beta('b_business_sector_non_movers', 0, None, None, 0)
     b_home_work_distance_car = Beta('b_home_work_distance_car', 0, None, None, 0)
     b_home_work_distance_no_car = Beta('b_home_work_distance_no_car', 0, None, None, 0)
     b_nb_car_in_hh = Beta('b_nb_car_in_hh', 0, None, None, 1)
@@ -198,37 +195,6 @@ def run_estimation_home_work(data_file_directory, data_file_name, output_directo
     executives = DefineVariable('executives', work_position == 1, database)
     french = DefineVariable('french', language == 2, database)
     italian_employees = DefineVariable('italian', (language == 3) & (work_position == 2), database)
-
-    business_sector_agriculture_employee = DefineVariable('business_sector_agriculture_employee',
-                                                          (1 <= noga_08 <= 7) * (work_position == 2), database)
-    business_sector_agriculture_cadre = DefineVariable('business_sector_agriculture_cadre',
-                                                       (1 <= noga_08 <= 7) * (work_position == 1), database)
-    business_sector_retail = DefineVariable('business_sector_retail', 47 <= noga_08 <= 47, database)
-    business_sector_gastronomy = DefineVariable('business_sector_gastronomy', 55 <= noga_08 <= 57, database)
-    business_sector_finance = DefineVariable('business_sector_finance', 64 <= noga_08 <= 67, database)
-    business_sector_production = DefineVariable('business_sector_production',
-                                                         (10 <= noga_08 <= 35) | (40 <= noga_08 <= 44), database)
-    business_sector_wholesale_employee = DefineVariable('business_sector_wholesale_employee',
-                                               ((45 <= noga_08 <= 46) | (49 <= noga_08 <= 54)) *
-                                                         (work_position == 2), database)
-    business_sector_wholesale_cadre = DefineVariable('business_sector_wholesale_cadre',
-                                                        ((45 <= noga_08 <= 46) | (49 <= noga_08 <= 54)) *
-                                                        (work_position == 1), database)
-    business_sector_services_fC = DefineVariable('business_sector_services_fC',
-                                                 (60 <= noga_08 <= 63) | (69 <= noga_08 <= 83) | (noga_08 == 58),
-                                                 database)
-    business_sector_other_services = DefineVariable('business_sector_other_services', (86 <= noga_08 <= 90) |
-                                                    (92 <= noga_08 <= 96) | (noga_08 == 59) | (noga_08 == 68), database)
-    business_sector_others = DefineVariable('business_sector_others', 97 <= noga_08 <= 98, database)
-    business_sector_non_movers_employee = DefineVariable('business_sector_non_movers_employee',
-                                                (work_position == 2) *
-                                                ((8 <= noga_08 <= 9) | (84 <= noga_08 <= 85) | (noga_08 == 91) |
-                                                 (noga_08 == 99)), database)
-    business_sector_non_movers_cadre = DefineVariable('business_sector_non_movers_cadre',
-                                                         (work_position == 1) *
-                                                         ((8 <= noga_08 <= 9) | (84 <= noga_08 <= 85) | (
-                                                                     noga_08 == 91) |
-                                                          (noga_08 == 99)), database)
 
     work_percentage = DefineVariable('work_percentage',
                                      bioMin((full_part_time_job == 1) * 100 +
@@ -351,19 +317,16 @@ def run_estimation_home_work(data_file_directory, data_file_name, output_directo
         b_percentage_home_office * percentage_if_home_office + \
         b_french * french + \
         b_italian_employees * italian_employees + \
-        b_business_sector_agriculture_employee * business_sector_agriculture_employee + \
-        b_business_sector_agriculture_cadre * business_sector_agriculture_cadre + \
+        b_business_sector_agriculture * business_sector_agriculture + \
         b_business_sector_retail * business_sector_retail + \
         b_business_sector_gastronomy * business_sector_gastronomy + \
         b_business_sector_finance * business_sector_finance + \
         b_business_sector_production * business_sector_production + \
-        b_business_sector_wholesale_employee * business_sector_wholesale_employee + \
-        b_business_sector_wholesale_cadre * business_sector_wholesale_cadre + \
-        b_business_sector_services_fc * business_sector_services_fC + \
+        b_business_sector_wholesale * business_sector_wholesale + \
+        b_business_sector_services_fc * business_sector_services_fc + \
         b_business_sector_other_services * business_sector_other_services + \
         b_business_sector_others * business_sector_others + \
-        b_business_sector_non_movers_employee * business_sector_non_movers_employee + \
-        b_business_sector_non_movers_cadre * business_sector_non_movers_cadre + \
+        b_business_sector_non_movers * business_sector_non_movers + \
         models.piecewiseFormula(work_percentage, [0, 10, 50, 101]) + \
         b_home_work_distance_car * home_work_distance_car + \
         b_home_work_distance_no_car * home_work_distance_no_car + \

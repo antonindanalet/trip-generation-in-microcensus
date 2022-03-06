@@ -2,6 +2,7 @@ import pandas as pd
 import pyreadstat
 from pathlib import Path
 import geopandas
+import numpy as np
 from choice_models.nb_trips.estimation.home_work import run_estimation_home_work
 from utils_mtmc.get_mtmc_files import get_trips, get_zp, get_hh, get_hhp
 from mtmc2015.utils2015.compute_confidence_interval import get_weighted_avg_and_std
@@ -111,6 +112,43 @@ def generate_data_file(df_trips):
                            'W_X_CH1903', 'W_Y_CH1903']
     df_hh = get_hh(2015, selected_columns_hh)
     df_agg_trips = pd.merge(df_agg_trips, df_hh, on='HHNR', how='left')
+
+    ''' Define the business sectors:
+        The 10 business sectors are an aggregation of the General Classification of Economic Activities (NOGA 2008) 
+        defined by the Swiss Federal Statistical Office (FSO).
+        The correspondence between NOGA codes and the aggregation can be found in:
+        Balz Bodenmann, Pascal Buerki, Camilla Philipp, Nadja Bernhard, Kirill Mueller, Andreas Justen, Antonin Danalet, 
+        Nicole A. Mathys, Wolfgang Scherr, Denis Metrailler, and Nathalie Frischknecht. Synthetische Population 2017 - 
+        Modellierung mit dem Flaechennutzungsmodell FaLC. Technical report, Federal Office for Spatial Development ARE 
+        and Swiss Federal Railways SBB, Bern, 2019, 
+        https://www.are.admin.ch/are/de/home/medien-und-publikationen/publikationen/grundlagen/synthetische-population-2017.html
+        The correspondence between the numeric NOGA codes and the names of the economic activities can be found in:
+        Federal Statistical Office. NOGA 2008, General Classification of Economic Activities - Structure. Technical 
+        report, Federal Statistical Office, Neuchatel, 2008, 
+        https://www.bfs.admin.ch/bfs/en/home/statistics/industry-services/nomenclatures/noga/publications-noga-2008.assetdetail.344622.html
+        '''
+    df_agg_trips['business_sector_agriculture'] = np.where((1 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 7), 1, 0)
+    df_agg_trips['business_sector_retail'] = np.where((df_agg_trips['noga_08'] == 47) | (df_agg_trips['noga_08'] == 48), 1, 0)
+    df_agg_trips['business_sector_gastronomy'] = np.where((55 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 57), 1, 0)
+    df_agg_trips['business_sector_finance'] = np.where((64 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 67), 1, 0)
+    df_agg_trips['business_sector_production'] = np.where(((10 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 35)) |
+                                                   ((40 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 44)), 1, 0)
+    df_agg_trips['business_sector_wholesale'] = np.where(((45 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 46)) |
+                                                  ((49 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 54)), 1, 0)
+    df_agg_trips['business_sector_services_fc'] = np.where(((60 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 63)) |
+                                                    ((69 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 83)) |
+                                                    (df_agg_trips['noga_08'] == 58), 1, 0)
+    df_agg_trips['business_sector_other_services'] = np.where(((86 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 90)) |
+                                                       ((92 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 96)) |
+                                                       (df_agg_trips['noga_08'] == 59) |
+                                                       (df_agg_trips['noga_08'] == 68), 1, 0)
+    df_agg_trips['business_sector_others'] = np.where((97 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 98), 1, 0)
+    df_agg_trips['business_sector_non_movers'] = np.where(((8 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 9)) |
+                                                   ((36 <= df_agg_trips['noga_08']) & (df_agg_trips['noga_08'] <= 39)) |
+                                                   (df_agg_trips['noga_08'] == 84) | (df_agg_trips['noga_08'] == 85) |
+                                                   (df_agg_trips['noga_08'] == 91) | (df_agg_trips['noga_08'] == 99), 1, 0)
+    del df_agg_trips['noga_08']
+
     ''' Add the distance between home and work places '''
     df_agg_trips_with_work_coord = df_agg_trips[df_agg_trips.A_X_CH1903 != -999]
     geodf_home = geopandas.GeoDataFrame(df_agg_trips_with_work_coord,
