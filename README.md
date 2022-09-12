@@ -19,7 +19,3 @@ Please copy the files haushalte.csv and zielpersonen.csv of the Mobility and Tra
 
 DO NOT commit or share in any way the CSV files haushalte.csv and zielpersonen.csv! These are personal data.
 
-## Contact
-
-Please don't hesitate to contact me if you have questions or comments about this code: antonin.danalet@are.admin.ch
-
